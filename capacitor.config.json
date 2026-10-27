@@ -1,0 +1,7 @@
+{
+  "appId": "cu.misinversiones.app",
+  "appName": "Mis Inversiones",
+  "webDir": "www",
+  "plugins": { "CapacitorHttp": { "enabled": true } },
+  "android": { "backgroundColor": "#0b1f1a" }
+}
