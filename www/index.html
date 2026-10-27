@@ -1,0 +1,567 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0b1f1a">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<title>Mis Inversiones</title>
+<style>
+:root{
+  --bg:#f4f6f5;--card:#ffffff;--ink:#14231e;--mute:#5d6f68;--line:#dfe6e3;
+  --brand:#0f766e;--brand-ink:#ffffff;--gain:#0a7d3c;--loss:#c2261f;--warn:#9a6700;
+  --gain-bg:#e3f5ea;--loss-bg:#fde8e6;--chip:#eaf0ee;--shadow:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0b1512;--card:#13211d;--ink:#e8f1ee;--mute:#93a9a1;--line:#243a34;
+  --brand:#2dd4bf;--brand-ink:#04211c;--gain:#4ade80;--loss:#ff7b72;--warn:#e3b341;
+  --gain-bg:#12301f;--loss-bg:#3a1a18;--chip:#1b2e29;--shadow:none;}}
+:root[data-theme="dark"]{
+  --bg:#0b1512;--card:#13211d;--ink:#e8f1ee;--mute:#93a9a1;--line:#243a34;
+  --brand:#2dd4bf;--brand-ink:#04211c;--gain:#4ade80;--loss:#ff7b72;--warn:#e3b341;
+  --gain-bg:#12301f;--loss-bg:#3a1a18;--chip:#1b2e29;--shadow:none;}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+body{padding-bottom:calc(72px + env(safe-area-inset-bottom))}
+header.top{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(10px + env(safe-area-inset-top)) 16px 8px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--line)}
+header.top h1{font-size:18px;margin:0;font-weight:700;letter-spacing:-.01em}
+.seg{display:inline-flex;background:var(--chip);border-radius:10px;padding:2px}
+.seg button{border:0;background:transparent;color:var(--mute);padding:6px 12px;border-radius:8px;font:inherit;font-weight:600;min-height:32px}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:var(--shadow)}
+main{padding:12px 16px;max-width:760px;margin:0 auto}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px;box-shadow:var(--shadow)}
+.card h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:0 0 10px;font-weight:700}
+.hero .big{font-size:32px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+.hero .sub{color:var(--mute);margin-top:4px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.kpi{background:var(--chip);border-radius:12px;padding:10px 12px}
+.kpi .l{font-size:12px;color:var(--mute)}
+.kpi .v{font-size:17px;font-weight:700;margin-top:2px;word-break:break-word}
+.kpi .s{font-size:12px;color:var(--mute)}
+.gain{color:var(--gain)}.loss{color:var(--loss)}.mute{color:var(--mute)}
+.badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:700;white-space:nowrap}
+.badge.gain{background:var(--gain-bg)}.badge.loss{background:var(--loss-bg)}.badge.mute{background:var(--chip)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.list .item{padding:12px 0;border-top:1px solid var(--line);cursor:pointer}
+.list .item:first-child{border-top:0}
+.item .t{font-weight:600}.item .m{font-size:13px;color:var(--mute)}
+.rates{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.rate{background:var(--chip);border-radius:12px;padding:10px;text-align:center}
+.rate b{display:block;font-size:12px;color:var(--mute)}.rate span{font-size:18px;font-weight:800}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--card);border-top:1px solid var(--line);display:flex;padding-bottom:env(safe-area-inset-bottom)}
+nav.tabs button{flex:1;border:0;background:transparent;color:var(--mute);padding:9px 2px 8px;font:inherit;font-size:11px;font-weight:600;display:flex;flex-direction:column;align-items:center;gap:2px;min-height:56px}
+nav.tabs button svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round}
+nav.tabs button.on{color:var(--brand)}
+.btn{border:0;background:var(--brand);color:var(--brand-ink);padding:11px 16px;border-radius:12px;font:inherit;font-weight:700;min-height:44px}
+.btn.ghost{background:var(--chip);color:var(--ink)}
+.btn.danger{background:var(--loss-bg);color:var(--loss)}
+.btn.sm{padding:7px 12px;min-height:36px;font-size:14px}
+.btns{display:flex;flex-wrap:wrap;gap:8px}
+.fab{position:fixed;right:16px;bottom:calc(76px + env(safe-area-inset-bottom));z-index:6;width:56px;height:56px;border-radius:28px;border:0;background:var(--brand);color:var(--brand-ink);font-size:30px;line-height:1;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+.sheet-bg{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--card);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:18px 18px 0 0;padding:16px 16px calc(20px + env(safe-area-inset-bottom))}
+.sheet h3{margin:0 0 12px;font-size:18px}
+label{display:block;font-size:13px;font-weight:600;color:var(--mute);margin:10px 0 4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:44px}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--brand);outline-offset:0}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.total{margin-top:12px;padding:10px 12px;background:var(--chip);border-radius:10px;font-weight:700}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(90px + env(safe-area-inset-bottom));background:#111;color:#fff;padding:10px 16px;border-radius:99px;z-index:40;font-size:14px;max-width:90vw}
+.banner{background:var(--loss-bg);color:var(--loss);border-radius:12px;padding:10px 12px;margin-bottom:12px;font-weight:600}
+.banner.info{background:var(--chip);color:var(--ink);font-weight:500}
+.empty{text-align:center;color:var(--mute);padding:28px 8px}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px}
+.chips button{border:1px solid var(--line);background:var(--card);color:var(--ink);padding:6px 12px;border-radius:99px;font:inherit;font-size:13px;white-space:nowrap;min-height:34px}
+.chips button.on{background:var(--brand);color:var(--brand-ink);border-color:var(--brand)}
+table.t{width:100%;border-collapse:collapse;font-size:14px}
+table.t td,table.t th{padding:6px 4px;border-top:1px solid var(--line);text-align:right}
+table.t td:first-child,table.t th:first-child{text-align:left}
+svg.spark{width:100%;height:46px;display:block}
+.hint{font-size:12px;color:var(--mute);margin-top:4px}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1 id="title">Mis Inversiones</h1>
+  <div class="seg" id="viewSeg" role="group" aria-label="Moneda de visualización">
+    <button data-view="CUP">CUP</button><button data-view="USD">USD</button>
+  </div>
+</header>
+<main id="main"></main>
+<button class="fab" id="fab" aria-label="Agregar">+</button>
+<nav class="tabs" id="tabs"></nav>
+
+<script>
+"use strict";
+/* ============ Estado y almacenamiento ============ */
+const KEY = 'inversiones_cuba_v1';
+const CURS = ['CUP','USD','EUR','MLC'];
+const METHODS = {efectivo:'Efectivo', transferencia:'Transferencia'};
+const TYPES = {compra:'Compra', venta:'Venta', gasto:'Gasto', ingreso:'Ingreso extra'};
+const OUT = {compra:1, gasto:1};            // salen de tu bolsillo
+const fresh = () => ({v:1, rates:{USD:0,EUR:0,MLC:0}, ratesAt:null, ratesSrc:'', rateHist:[],
+  products:[], moves:[], set:{token:'', view:'CUP', auto:true}});
+let S = load();
+function load(){ try{ const r = JSON.parse(localStorage.getItem(KEY)); if(r && r.v===1){ r.set = Object.assign(fresh().set, r.set); return r; } }catch(e){} return fresh(); }
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); }catch(e){ toast('No se pudo guardar (almacenamiento lleno o bloqueado)'); } }
+const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+const today = () => { const d=new Date(); return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'); };
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const $ = s => document.querySelector(s);
+
+/* ============ Formato ============ */
+const nf = new Intl.NumberFormat('es', {maximumFractionDigits:2, minimumFractionDigits:0, useGrouping:'always'});
+const nf2 = new Intl.NumberFormat('es', {maximumFractionDigits:2, minimumFractionDigits:2, useGrouping:'always'});
+const money = (v,c,dec2) => (Number.isFinite(v) ? (dec2?nf2:nf).format(v) : '—') + ' ' + c;
+const signed = (v,c) => (v>0.005?'+':'') + money(Math.abs(v)<0.005?0:v, c);
+const cls = v => v>0.005 ? 'gain' : v<-0.005 ? 'loss' : 'mute';
+const arrow = v => v>0.005 ? '▲' : v<-0.005 ? '▼' : '■';
+const pct = v => Number.isFinite(v) ? (v>0?'+':'') + nf.format(v) + '%' : '—';
+const fdate = d => { if(!d) return ''; const [y,m,dd]=d.split('-'); return dd+'/'+m+'/'+y.slice(2); };
+const ftime = t => t ? new Date(t).toLocaleString('es',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : 'nunca';
+
+/* ============ Conversión y cálculos ============ */
+// r = tabla de tasas (CUP por 1 unidad de moneda). Se guarda una copia en cada movimiento.
+const toCUP = (a,cur,r) => cur==='CUP' ? a : a*(r[cur]||0);
+const toUSD = (a,cur,r) => cur==='USD' ? a : (r.USD ? toCUP(a,cur,r)/r.USD : 0);
+const vcur = () => S.set.view;
+const pick = (o) => vcur()==='USD' ? o.u : o.c;       // o = {c, u}
+const other = (o) => vcur()==='USD' ? o.c : o.u;
+const otherCur = () => vcur()==='USD' ? 'CUP' : 'USD';
+const z = () => ({c:0,u:0});
+const byDate = (a,b) => (a.date<b.date?-1:a.date>b.date?1:a.ts-b.ts);
+
+/* Costo promedio ponderado. Ganancia realizada = venta - costo promedio de lo vendido.
+   Ganancia no realizada = valor de mercado actual de lo que queda - su costo.
+   Cada movimiento usa la tasa que se guardó ese día, así se ve el efecto del cambio de moneda. */
+function calc(p){
+  const ms = S.moves.filter(m=>m.pid===p.id).sort(byDate);
+  const o = {qty:0, cost:z(), bought:z(), sold:z(), real:z(), exp:z(), inc:z(), warn:false, n:ms.length};
+  for(const m of ms){
+    const c = toCUP(m.amt,m.cur,m.r), u = toUSD(m.amt,m.cur,m.r);
+    if(m.type==='compra'){ o.qty+=m.qty; o.cost.c+=c; o.cost.u+=u; o.bought.c+=c; o.bought.u+=u; }
+    else if(m.type==='venta'){
+      if(m.qty>o.qty+1e-9) o.warn=true;
+      const take = Math.min(m.qty,o.qty), f = o.qty>0 ? take/o.qty : 0;
+      const cc=o.cost.c*f, cu=o.cost.u*f;
+      o.real.c += c-cc; o.real.u += u-cu; o.sold.c+=c; o.sold.u+=u;
+      o.qty-=take; o.cost.c-=cc; o.cost.u-=cu;
+    }
+    else if(m.type==='gasto'){ o.exp.c+=c; o.exp.u+=u; }
+    else { o.inc.c+=c; o.inc.u+=u; }
+  }
+  if(o.qty<1e-9){ o.qty=0; o.cost=z(); }
+  o.val = z();
+  if(o.qty>0){
+    if(p.price){ o.val.c = toCUP(p.price.amt*o.qty,p.price.cur,S.rates); o.val.u = toUSD(p.price.amt*o.qty,p.price.cur,S.rates); }
+    else { o.val = {c:o.cost.c,u:o.cost.u}; o.noPrice=true; }
+  }
+  o.unr = {c:o.val.c-o.cost.c, u:o.val.u-o.cost.u};
+  o.net = {c:o.real.c+o.unr.c+o.inc.c-o.exp.c, u:o.real.u+o.unr.u+o.inc.u-o.exp.u};
+  o.base = {c:o.bought.c+o.exp.c, u:o.bought.u+o.exp.u};         // todo lo que pusiste
+  o.roi = o.base.c>0 ? (pick(o.net)/pick(o.base))*100 : NaN;
+  o.avgUnit = o.qty>0 ? o.cost : null;
+  return o;
+}
+function totals(){
+  const T = {cost:z(),val:z(),real:z(),unr:z(),exp:z(),inc:z(),net:z(),base:z(),n:0};
+  const per = S.products.map(p=>({p, c:calc(p)}));
+  for(const {c} of per){ for(const k of ['cost','val','real','unr','exp','inc','net','base']){ T[k].c+=c[k].c; T[k].u+=c[k].u; } }
+  T.roi = T.base.c>0 ? (pick(T.net)/pick(T.base))*100 : NaN;
+  return {T, per};
+}
+// Flujo de dinero real por cartera (moneda x método)
+function wallets(){
+  const W = {};
+  for(const m of S.moves){
+    const k = m.cur+'|'+m.method; const w = W[k] || (W[k]={cur:m.cur,method:m.method,in:0,out:0});
+    if(OUT[m.type]) w.out+=m.amt; else w.in+=m.amt;
+  }
+  return Object.values(W).sort((a,b)=>CURS.indexOf(a.cur)-CURS.indexOf(b.cur) || a.method.localeCompare(b.method));
+}
+const hasRates = () => S.rates.USD > 0;
+
+/* ============ UI base ============ */
+let tab = 'resumen', filter = {type:'', method:'', cur:'', pid:''};
+function toast(msg){ document.querySelectorAll('.toast').forEach(x=>x.remove()); const t=document.createElement('div'); t.className='toast'; t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2800); }
+function openSheet(title, html, onReady){
+  closeSheet();
+  const bg=document.createElement('div'); bg.className='sheet-bg'; bg.id='sheetbg';
+  bg.innerHTML = `<div class="sheet" role="dialog" aria-label="${esc(title)}"><h3>${esc(title)}</h3>${html}</div>`;
+  bg.addEventListener('click', e=>{ if(e.target===bg) closeSheet(); });
+  document.body.appendChild(bg);
+  if(onReady) onReady(bg.querySelector('.sheet'));
+}
+function closeSheet(){ const b=$('#sheetbg'); if(b) b.remove(); }
+const opts = (obj, sel) => Object.entries(obj).map(([k,v])=>`<option value="${k}" ${k===sel?'selected':''}>${esc(v)}</option>`).join('');
+const curOpts = sel => CURS.map(c=>`<option ${c===sel?'selected':''}>${c}</option>`).join('');
+function spark(vals){
+  vals = vals.filter(Number.isFinite); if(vals.length<2) return '<div class="hint">Aún no hay suficientes datos para la gráfica.</div>';
+  const mn=Math.min(...vals), mx=Math.max(...vals), rg=(mx-mn)||1, W=300, H=46;
+  const pts = vals.map((v,i)=>[(i/(vals.length-1))*W, H-4-((v-mn)/rg)*(H-8)]);
+  const up = vals[vals.length-1]>=vals[0];
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Tendencia"><polyline fill="none" stroke="${up?'var(--gain)':'var(--loss)'}" stroke-width="2.2" stroke-linejoin="round" points="${pts.map(p=>p.map(n=>n.toFixed(1)).join(',')).join(' ')}"/></svg>`;
+}
+
+/* ============ Pantallas ============ */
+const ICONS = {
+  resumen:'<svg viewBox="0 0 24 24"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>',
+  inversiones:'<svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8"/><path d="M15 7h6v6"/></svg>',
+  movimientos:'<svg viewBox="0 0 24 24"><path d="M7 4v16M7 20l-3-3M7 20l3-3"/><path d="M17 20V4M17 4l-3 3M17 4l3 3"/></svg>',
+  tasas:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.5-.8-1.4-1.2-2.5-1.2-1.5 0-2.6.8-2.6 2s1 1.7 2.6 2 2.6.8 2.6 2-1.100 2-2.600 2c-1.200 0-2.100-.4-2.600-1.200M12 6v2M12 16v2"/></svg>',
+  ajustes:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 00.3 1.8l.1.1a2 2 0 11-2.800 2.800l-.1-.1a1.700 1.700 0 00-1.800-.3 1.700 1.700 0 00-1 1.500V21a2 2 0 11-4 0v-.1a1.700 1.700 0 00-1.100-1.500 1.700 1.700 0 00-1.800.3l-.1.1a2 2 0 11-2.800-2.800l.1-.1a1.700 1.700 0 00.3-1.800 1.700 1.700 0 00-1.500-1H3a2 2 0 110-4h.1a1.700 1.700 0 001.500-1.100 1.700 1.700 0 00-.3-1.800l-.1-.1a2 2 0 112.800-2.800l.1.100a1.700 1.700 0 001.800.3H9a1.700 1.700 0 001-1.500V3a2 2 0 114 0v.1a1.700 1.700 0 001 1.500 1.700 1.700 0 001.800-.3l.1-.1a2 2 0 112.800 2.800l-.1.100a1.700 1.700 0 00-.3 1.800V9a1.700 1.700 0 001.500 1H21a2 2 0 110 4h-.1a1.700 1.700 0 00-1.500 1z"/></svg>'
+};
+const TABS = [['resumen','Resumen'],['inversiones','Inversiones'],['movimientos','Movimientos'],['tasas','Tasas'],['ajustes','Ajustes']];
+function renderTabs(){
+  $('#tabs').innerHTML = TABS.map(([k,l])=>`<button data-tab="${k}" class="${tab===k?'on':''}" aria-label="${l}">${ICONS[k]}<span>${l}</span></button>`).join('');
+  document.querySelectorAll('#viewSeg button').forEach(b=>b.classList.toggle('on', b.dataset.view===vcur()));
+  $('#fab').style.display = (tab==='inversiones'||tab==='resumen'||tab==='movimientos') ? '' : 'none';
+}
+function render(){
+  renderTabs();
+  const f = {resumen:vResumen, inversiones:vInversiones, movimientos:vMovimientos, tasas:vTasas, ajustes:vAjustes}[tab];
+  $('#main').innerHTML = f();
+  window.scrollTo(0,0);
+}
+const rateBanner = () => hasRates() ? '' :
+  `<div class="banner" data-act="goto" data-tab="tasas">Falta la tasa del dólar. Toca aquí para ponerla en Tasas; sin ella no se pueden convertir CUP ↔ USD.</div>`;
+
+function kpi(l, o, opt={}){
+  const v = pick(o), s = other(o);
+  return `<div class="kpi"><div class="l">${l}</div><div class="v ${opt.color?cls(v):''}">${opt.color?arrow(v)+' ':''}${opt.sign?signed(v,vcur()):money(v,vcur())}</div><div class="s">${opt.sign?signed(s,otherCur()):money(s,otherCur())}</div></div>`;
+}
+function vResumen(){
+  const {T, per} = totals();
+  const net = pick(T.net);
+  const ranked = per.filter(x=>x.c.n).sort((a,b)=>pick(b.c.net)-pick(a.c.net));
+  const W = wallets();
+  return rateBanner() + `
+  <div class="card hero">
+    <h2>Ganancia / pérdida total</h2>
+    <div class="big ${cls(net)}">${arrow(net)} ${signed(net,vcur())}</div>
+    <div class="sub">${signed(other(T.net),otherCur())} · Rendimiento <b class="${cls(net)}">${pct(T.roi)}</b> sobre lo que has puesto</div>
+  </div>
+  <div class="card"><h2>Tasas del mercado informal</h2>${ratesStrip()}</div>
+  <div class="card"><h2>Desglose</h2><div class="grid">
+    ${kpi('Invertido ahora (costo)',T.cost)}
+    ${kpi('Valor de mercado hoy',T.val)}
+    ${kpi('Ganancia ya cobrada',T.real,{color:1,sign:1})}
+    ${kpi('Ganancia sin cobrar',T.unr,{color:1,sign:1})}
+    ${kpi('Gastos',T.exp)}
+    ${kpi('Ingresos extra',T.inc)}
+  </div>
+  <p class="hint">«Ganancia ya cobrada» = ventas menos el costo de lo vendido. «Sin cobrar» = lo que valdría hoy lo que aún tienes, menos lo que te costó.</p></div>
+  <div class="card"><h2>Dinero por cartera (efectivo / transferencia)</h2>
+    ${W.length ? `<table class="t"><tr><th>Cartera</th><th>Entró</th><th>Salió</th><th>Neto</th></tr>${W.map(w=>{const n=w.in-w.out;return `<tr><td>${w.cur} ${METHODS[w.method].toLowerCase()}</td><td>${nf.format(w.in)}</td><td>${nf.format(w.out)}</td><td class="${cls(n)}"><b>${n>0?'+':''}${nf.format(n)}</b></td></tr>`}).join('')}</table><p class="hint">Es el flujo de lo que has registrado: compras y gastos salen; ventas e ingresos entran. Un neto negativo significa que aún tienes ese dinero metido en mercancía.</p>` : '<div class="empty">Cuando registres compras y ventas verás aquí cuánto movió cada cartera.</div>'}
+  </div>
+  <div class="card"><h2>Mejores y peores</h2>
+    ${ranked.length ? `<div class="list">${ranked.map(({p,c})=>`<div class="item" data-act="prod" data-id="${p.id}"><div class="row"><div><div class="t">${esc(p.name)}</div><div class="m">${nf.format(c.qty)} ${esc(p.unit||'u')} en mano</div></div><span class="badge ${cls(pick(c.net))}">${arrow(pick(c.net))} ${signed(pick(c.net),vcur())}</span></div></div>`).join('')}</div>` : '<div class="empty">Aún no hay inversiones. Toca + para agregar la primera.</div>'}
+  </div>`;
+}
+function ratesStrip(){
+  const r = S.rates;
+  return `<div class="rates">${['USD','EUR','MLC'].map(c=>`<div class="rate"><b>${c}</b><span>${r[c]?nf.format(r[c]):'—'}</span></div>`).join('')}</div>
+  <div class="row" style="margin-top:10px"><span class="hint">CUP por 1 unidad · actualizado: ${ftime(S.ratesAt)}${S.ratesSrc?' ('+esc(S.ratesSrc)+')':''}</span>
+  <button class="btn sm ghost" data-act="refresh">Actualizar</button></div>`;
+}
+function vInversiones(){
+  if(!S.products.length) return rateBanner() + `<div class="empty">No tienes inversiones registradas.<br><br><button class="btn" data-act="newprod">Agregar inversión</button></div>`;
+  const items = S.products.map(p=>({p,c:calc(p)})).sort((a,b)=>pick(b.c.val)-pick(a.c.val));
+  return rateBanner() + items.map(({p,c})=>{
+    const net = pick(c.net);
+    return `<div class="card" data-act="prod" data-id="${p.id}" style="cursor:pointer">
+      <div class="row"><div><div class="t" style="font-weight:700;font-size:16px">${esc(p.name)}</div><div class="m mute">${esc(p.cat||'')}</div></div>
+        <span class="badge ${cls(net)}">${arrow(net)} ${signed(net,vcur())}</span></div>
+      <div class="grid" style="margin-top:10px">
+        <div class="kpi"><div class="l">En mano</div><div class="v">${nf.format(c.qty)} ${esc(p.unit||'u')}</div><div class="s">${c.qty>0?'costo prom. '+money(pick(c.cost)/c.qty,vcur(),true):'—'}</div></div>
+        <div class="kpi"><div class="l">Precio hoy</div><div class="v">${p.price?money(p.price.amt,p.price.cur,true):'sin precio'}</div><div class="s">${p.price?fdate(new Date(p.price.t).toISOString().slice(0,10)):'actualízalo'}</div></div>
+      </div>
+      <div class="row" style="margin-top:8px"><span class="hint">Rendimiento ${pct(c.roi)}${c.noPrice&&c.qty>0?' · valorado a costo (falta precio)':''}</span><span class="hint">${other(c.net)!==undefined?signed(other(c.net),otherCur()):''}</span></div>
+    </div>`;}).join('');
+}
+function moveRow(m, showProd=true){
+  const p = S.products.find(x=>x.id===m.pid);
+  const out = OUT[m.type];
+  const detail = (m.type==='compra'||m.type==='venta') ? `${nf.format(m.qty)} × ${money(m.unit,m.cur,true)}` : esc(m.note||'');
+  return `<div class="item" data-act="editmove" data-id="${m.id}"><div class="row"><div>
+    <div class="t">${TYPES[m.type]}${showProd&&p?' · '+esc(p.name):''}</div>
+    <div class="m">${fdate(m.date)} · ${METHODS[m.method]} · ${detail}</div></div>
+    <div style="text-align:right"><b class="${out?'loss':'gain'}">${out?'−':'+'}${money(m.amt,m.cur)}</b></div></div></div>`;
+}
+function vMovimientos(){
+  const f = filter;
+  let ms = S.moves.slice().sort((a,b)=>-byDate(a,b)).filter(m=>(!f.type||m.type===f.type)&&(!f.method||m.method===f.method)&&(!f.cur||m.cur===f.cur)&&(!f.pid||m.pid===f.pid));
+  const chip = (k,v,l)=>`<button data-act="filter" data-k="${k}" data-v="${v}" class="${f[k]===v?'on':''}">${l}</button>`;
+  return `<div class="chips">${chip('type','','Todos')}${Object.entries(TYPES).map(([k,l])=>chip('type',k,l)).join('')}</div>
+  <div class="chips">${chip('method','','Efectivo y transf.')}${chip('method','efectivo','Efectivo')}${chip('method','transferencia','Transferencia')}${CURS.map(c=>chip('cur',c,c)).join('')}</div>
+  <div class="card">${ms.length ? `<div class="list">${ms.map(m=>moveRow(m)).join('')}</div>` : '<div class="empty">No hay movimientos con ese filtro.</div>'}</div>`;
+}
+function vTasas(){
+  const r = S.rates;
+  const hist = S.rateHist.slice(-12).reverse();
+  const usdSeries = S.rateHist.slice(-30).map(h=>h.USD);
+  return `<div class="card"><h2>Tasas actuales (CUP por 1)</h2>
+    <form data-form="rates">
+      <div class="two"><div><label>USD</label><input name="USD" type="number" inputmode="decimal" step="any" value="${r.USD||''}"></div>
+      <div><label>EUR</label><input name="EUR" type="number" inputmode="decimal" step="any" value="${r.EUR||''}"></div></div>
+      <div class="two"><div><label>MLC</label><input name="MLC" type="number" inputmode="decimal" step="any" value="${r.MLC||''}"></div><div></div></div>
+      <div class="btns" style="margin-top:14px"><button class="btn" type="submit">Guardar tasas</button>
+      <button class="btn ghost" type="button" data-act="refresh">Actualizar desde elToque</button></div>
+      <p class="hint">Última actualización: ${ftime(S.ratesAt)}${S.ratesSrc?' · '+esc(S.ratesSrc):''}. Si no tienes internet o token, escribe las tasas a mano; la app funciona igual sin conexión.</p>
+    </form></div>
+  <div class="card"><h2>Tendencia del USD</h2>${spark(usdSeries)}</div>
+  <div class="card"><h2>Convertidor</h2>
+    <div class="two"><div><label>Monto</label><input id="cvA" type="number" inputmode="decimal" step="any" value="100"></div>
+    <div><label>De</label><select id="cvF">${curOpts('USD')}</select></div></div>
+    <label>A</label><select id="cvT">${curOpts('CUP')}</select>
+    <div class="total" id="cvR">—</div></div>
+  <div class="card"><h2>Historial</h2>${hist.length?`<table class="t"><tr><th>Fecha</th><th>USD</th><th>EUR</th><th>MLC</th></tr>${hist.map(h=>`<tr><td>${ftime(h.t)}</td><td>${h.USD||'—'}</td><td>${h.EUR||'—'}</td><td>${h.MLC||'—'}</td></tr>`).join('')}</table>`:'<div class="empty">Sin historial todavía.</div>'}</div>`;
+}
+function vAjustes(){
+  return `<div class="card"><h2>Actualización automática de tasas</h2>
+    <form data-form="settings">
+      <label>Token de la API de elToque</label><input name="token" type="password" autocomplete="off" placeholder="pega aquí tu token" value="${esc(S.set.token)}">
+      <p class="hint">elToque publica sus tasas por una API que exige un token personal gratuito (se pide en eltoque.com/tasas/api). Sin token puedes escribir las tasas a mano.</p>
+      <label><input type="checkbox" name="auto" ${S.set.auto?'checked':''} style="width:auto;min-height:0;margin-right:8px">Actualizar al abrir la app (si pasaron más de 3 h y hay internet)</label>
+      <div class="btns" style="margin-top:12px"><button class="btn" type="submit">Guardar</button></div>
+    </form></div>
+  <div class="card"><h2>Copia de seguridad</h2>
+    <p class="hint" style="margin-top:0">Tus datos viven solo en este teléfono. Haz una copia de vez en cuando; si borras los datos del navegador o desinstalas la app, se pierden.</p>
+    <div class="btns"><button class="btn" data-act="export">Exportar copia (JSON)</button><button class="btn ghost" data-act="csv">Exportar movimientos (CSV)</button><button class="btn ghost" data-act="import">Importar copia</button></div>
+    <input type="file" id="impFile" accept=".json,application/json" hidden></div>
+  <div class="card"><h2>Apariencia</h2><div class="seg"><button data-act="theme" data-v="auto">Auto</button><button data-act="theme" data-v="light">Claro</button><button data-act="theme" data-v="dark">Oscuro</button></div></div>
+  <div class="card"><h2>Zona de peligro</h2><button class="btn danger" data-act="wipe">Borrar todos los datos</button></div>`;
+}
+
+/* ============ Detalle de inversión ============ */
+function showProd(id){
+  const p = S.products.find(x=>x.id===id); if(!p) return;
+  const c = calc(p);
+  const net = pick(c.net);
+  const ms = S.moves.filter(m=>m.pid===id).sort((a,b)=>-byDate(a,b));
+  const ph = (p.hist||[]).slice(-30).map(h=>h.amt);
+  openSheet(p.name, `
+    <div class="hero"><div class="big ${cls(net)}" style="font-size:26px;font-weight:800">${arrow(net)} ${signed(net,vcur())}</div>
+    <div class="sub mute">${signed(other(c.net),otherCur())} · Rendimiento ${pct(c.roi)}</div></div>
+    ${c.warn?'<div class="banner" style="margin-top:10px">Hay ventas por más cantidad de la que tenías comprada. Revisa los movimientos.</div>':''}
+    <div class="grid" style="margin-top:12px">
+      <div class="kpi"><div class="l">En mano</div><div class="v">${nf.format(c.qty)} ${esc(p.unit||'u')}</div></div>
+      <div class="kpi"><div class="l">Precio hoy</div><div class="v">${p.price?money(p.price.amt,p.price.cur,true):'—'}</div></div>
+      ${kpi('Total comprado',c.bought)}${kpi('Total vendido',c.sold)}
+      ${kpi('Costo de lo que tienes',c.cost)}${kpi('Valor hoy',c.val)}
+      ${kpi('Ganancia cobrada',c.real,{color:1,sign:1})}${kpi('Ganancia sin cobrar',c.unr,{color:1,sign:1})}
+      ${kpi('Gastos',c.exp)}${kpi('Ingresos extra',c.inc)}
+    </div>
+    <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:16px 0 6px">Evolución del precio</h2>${spark(ph)}
+    <div class="btns" style="margin:12px 0">
+      <button class="btn sm" data-act="addmove" data-type="compra" data-id="${id}">+ Compra</button>
+      <button class="btn sm" data-act="addmove" data-type="venta" data-id="${id}">+ Venta</button>
+      <button class="btn sm ghost" data-act="addmove" data-type="gasto" data-id="${id}">+ Gasto</button>
+      <button class="btn sm ghost" data-act="addmove" data-type="ingreso" data-id="${id}">+ Ingreso</button>
+      <button class="btn sm ghost" data-act="price" data-id="${id}">Actualizar precio</button>
+      <button class="btn sm ghost" data-act="editprod" data-id="${id}">Editar</button>
+    </div>
+    <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--mute);margin:8px 0 0">Movimientos</h2>
+    ${ms.length?`<div class="list">${ms.map(m=>moveRow(m,false)).join('')}</div>`:'<div class="empty">Sin movimientos. Registra la primera compra.</div>'}
+    <div class="btns" style="margin-top:14px"><button class="btn ghost" data-act="close">Cerrar</button></div>`);
+}
+
+/* ============ Formularios ============ */
+function formProd(p){
+  const cats = ['Mercancía','Divisas','Alimentos','Transporte','Inmueble','Negocio','Cripto','Equipos','Otro'];
+  openSheet(p?'Editar inversión':'Nueva inversión', `
+    <form data-form="prod" data-id="${p?p.id:''}">
+      <label>Nombre del producto</label><input name="name" required maxlength="60" placeholder="Ej: Aceite 5L, Dólares, Moto" value="${esc(p?.name)}">
+      <div class="two"><div><label>Categoría</label><input name="cat" list="cats" value="${esc(p?.cat)}"><datalist id="cats">${cats.map(c=>`<option>${c}</option>`).join('')}</datalist></div>
+      <div><label>Unidad</label><input name="unit" maxlength="12" placeholder="u, lb, kg, caja" value="${esc(p?.unit||'u')}"></div></div>
+      ${p?'':`<div class="two"><div><label>Precio de mercado hoy (opcional)</label><input name="price" type="number" inputmode="decimal" step="any"></div>
+      <div><label>Moneda</label><select name="pcur">${curOpts('CUP')}</select></div></div>
+      <p class="hint">Es lo que cobrarías hoy por una unidad. Luego lo actualizas cuando cambie.</p>`}
+      <label>Notas</label><textarea name="notes" rows="2">${esc(p?.notes)}</textarea>
+      <div class="btns" style="margin-top:14px"><button class="btn" type="submit">Guardar</button>
+      ${p?`<button class="btn danger" type="button" data-act="delprod" data-id="${p.id}">Eliminar</button>`:''}
+      <button class="btn ghost" type="button" data-act="close">Cancelar</button></div>
+    </form>`);
+}
+function formPrice(id){
+  const p = S.products.find(x=>x.id===id);
+  openSheet('Precio de mercado · '+p.name, `
+    <form data-form="price" data-id="${id}">
+      <div class="two"><div><label>Precio por ${esc(p.unit||'u')}</label><input name="amt" type="number" inputmode="decimal" step="any" required value="${p.price?.amt||''}" autofocus></div>
+      <div><label>Moneda</label><select name="cur">${curOpts(p.price?.cur||'CUP')}</select></div></div>
+      <div class="btns" style="margin-top:14px"><button class="btn" type="submit">Actualizar</button><button class="btn ghost" type="button" data-act="close">Cancelar</button></div>
+    </form>`);
+}
+function formMove(type, pid, m){
+  if(!S.products.length){ toast('Primero agrega una inversión'); return formProd(); }
+  if(!hasRates()){ toast('Primero configura la tasa del USD en Tasas'); closeSheet(); tab='tasas'; render(); return; }
+  const isTrade = type==='compra'||type==='venta';
+  const cur = m?.cur || (S.products.find(p=>p.id===pid)?.price?.cur) || 'CUP';
+  openSheet((m?'Editar ':'Nueva ')+TYPES[type].toLowerCase(), `
+    <form data-form="move" data-id="${m?m.id:''}" data-type="${type}">
+      <label>Inversión</label><select name="pid">${S.products.map(p=>`<option value="${p.id}" ${p.id===(m?.pid||pid)?'selected':''}>${esc(p.name)}</option>`).join('')}</select>
+      <div class="two"><div><label>Fecha</label><input name="date" type="date" required value="${m?.date||today()}"></div>
+      <div><label>Método de pago</label><select name="method">${opts(METHODS, m?.method||'efectivo')}</select></div></div>
+      <div class="two"><div><label>Moneda</label><select name="cur">${curOpts(cur)}</select></div>
+      <div id="rateBox"><label id="rateLbl">Tasa</label><input name="rate" type="number" inputmode="decimal" step="any"></div></div>
+      ${isTrade ? `<div class="two"><div><label>Cantidad</label><input name="qty" type="number" inputmode="decimal" step="any" required value="${m?.qty||''}"></div>
+        <div><label>Precio por unidad</label><input name="unit" type="number" inputmode="decimal" step="any" required value="${m?.unit||''}"></div></div>`
+      : `<label>Monto</label><input name="amt" type="number" inputmode="decimal" step="any" required value="${m?.amt||''}">
+         <label>Detalle</label><input name="note" maxlength="80" placeholder="${type==='gasto'?'Transporte, almacenaje…':'Alquiler, propina…'}" value="${esc(m?.note)}">`}
+      <div class="total" id="mvTotal">Total: —</div>
+      <div id="mvWarn" class="hint"></div>
+      <div class="btns" style="margin-top:14px"><button class="btn" type="submit">Guardar</button>
+      ${m?`<button class="btn danger" type="button" data-act="delmove" data-id="${m.id}">Eliminar</button>`:''}
+      <button class="btn ghost" type="button" data-act="close">Cancelar</button></div>
+    </form>`, sheet=>{
+      const f = sheet.querySelector('form'), cs = f.cur, rate = f.rate;
+      const syncRate = (keep) => {
+        const c = cs.value, box = $('#rateBox');
+        box.style.display = c==='CUP' ? 'none' : '';
+        $('#rateLbl').textContent = 'Tasa: CUP por 1 '+c;
+        if(c!=='CUP'){ rate.value = (keep && m?.r?.[c]) ? m.r[c] : (S.rates[c]||''); rate.required = true; } else rate.required = false;
+        upd();
+      };
+      const upd = () => {
+        const q = isTrade ? +f.qty.value : 1, u = isTrade ? +f.unit.value : +f.amt.value;
+        const t = q*u, c = cs.value;
+        let txt = 'Total: ' + (t?money(t,c,true):'—');
+        if(t && c!=='CUP' && +rate.value) txt += '  ≈ ' + money(t*(+rate.value),'CUP');
+        $('#mvTotal').textContent = txt;
+        if(type==='venta' && f.pid.value){
+          const pr = S.products.find(x=>x.id===f.pid.value); const have = calc(pr).qty + (m && m.pid===pr.id ? m.qty : 0);
+          $('#mvWarn').textContent = q>have+1e-9 ? `Ojo: solo tienes ${nf.format(have)} ${pr.unit||'u'} registrados.` : `Tienes ${nf.format(have)} ${pr.unit||'u'} disponibles.`;
+        }
+      };
+      cs.addEventListener('change', ()=>syncRate(false)); f.addEventListener('input', upd); f.pid.addEventListener('change', upd);
+      syncRate(true);
+    });
+}
+
+/* ============ Acciones ============ */
+function setRates(r, src){
+  for(const c of ['USD','EUR','MLC']) if(r[c]>0) S.rates[c]=+r[c];
+  S.ratesAt = Date.now(); S.ratesSrc = src;
+  S.rateHist.push({t:S.ratesAt, USD:S.rates.USD, EUR:S.rates.EUR, MLC:S.rates.MLC});
+  if(S.rateHist.length>400) S.rateHist.splice(0, S.rateHist.length-400);
+  save();
+}
+async function fetchRates(silent){
+  if(!S.set.token){ if(!silent) toast('Pon tu token de elToque en Ajustes, o escribe las tasas a mano'); return false; }
+  if(!navigator.onLine){ if(!silent) toast('Sin conexión'); return false; }
+  try{
+    const d = today();
+    const url = `https://tasas.eltoque.com/v1/trmi?date_from=${d}%2000:00:01&date_to=${d}%2023:59:01`;
+    const res = await fetch(url, {headers:{accept:'*/*', Authorization:'Bearer '+S.set.token}});
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const j = await res.json(); const t = j.tasas || j.rates || j;
+    const r = {USD:+t.USD, EUR:+(t.ECU ?? t.EUR), MLC:+t.MLC};
+    if(!(r.USD>0)) throw new Error('respuesta sin USD');
+    setRates(r, 'elToque'); if(!silent) toast('Tasas actualizadas'); render(); return true;
+  }catch(e){
+    if(!silent) toast('No se pudo actualizar ('+e.message+'). Revisa token/conexión o escribe las tasas a mano.');
+    return false;
+  }
+}
+function download(name, text, mime){
+  const blob = new Blob([text],{type:mime}), file = new File([blob], name, {type:mime});
+  if(navigator.canShare && navigator.canShare({files:[file]})){ navigator.share({files:[file], title:name}).catch(()=>{}); return; }
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=name; document.body.appendChild(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+}
+function exportCSV(){
+  const q = v => '"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows = [['fecha','inversion','tipo','metodo','moneda','cantidad','precio_unit','monto','tasa_USD_ese_dia','nota']];
+  S.moves.slice().sort(byDate).forEach(m=>{ const p=S.products.find(x=>x.id===m.pid); rows.push([m.date,p?.name,m.type,m.method,m.cur,m.qty??'',m.unit??'',m.amt,m.r?.USD??'',m.note||'']); });
+  download('movimientos.csv','﻿'+rows.map(r=>r.map(q).join(',')).join('\n'),'text/csv');
+}
+function applyTheme(v){ const r=document.documentElement; if(v==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme',v); try{localStorage.setItem('inv_theme',v)}catch(e){} }
+
+document.addEventListener('click', e=>{
+  const t = e.target.closest('[data-tab],[data-view],[data-act]'); if(!t) return;
+  if(t.dataset.tab && !t.dataset.act){ tab=t.dataset.tab; render(); return; }
+  if(t.dataset.view){ S.set.view=t.dataset.view; save(); render(); return; }
+  const a = t.dataset.act, id = t.dataset.id;
+  switch(a){
+    case 'goto': tab=t.dataset.tab; render(); break;
+    case 'close': closeSheet(); break;
+    case 'refresh': fetchRates(false); break;
+    case 'newprod': formProd(); break;
+    case 'prod': showProd(id); break;
+    case 'editprod': formProd(S.products.find(p=>p.id===id)); break;
+    case 'price': formPrice(id); break;
+    case 'addmove': formMove(t.dataset.type, id); break;
+    case 'editmove': { const m=S.moves.find(x=>x.id===id); if(m) formMove(m.type, m.pid, m); break; }
+    case 'filter': filter[t.dataset.k]=t.dataset.v; render(); break;
+    case 'delmove': if(confirm('¿Eliminar este movimiento?')){ const pid=(S.moves.find(m=>m.id===id)||{}).pid; S.moves=S.moves.filter(m=>m.id!==id); save(); closeSheet(); render(); if(tab!=='movimientos'&&pid) showProd(pid); toast('Eliminado'); } break;
+    case 'delprod': if(confirm('¿Eliminar esta inversión y todos sus movimientos?')){ S.products=S.products.filter(p=>p.id!==id); S.moves=S.moves.filter(m=>m.pid!==id); save(); closeSheet(); render(); toast('Eliminada'); } break;
+    case 'export': download('inversiones-respaldo-'+today()+'.json', JSON.stringify(S), 'application/json'); break;
+    case 'csv': exportCSV(); break;
+    case 'import': $('#impFile').click(); break;
+    case 'theme': applyTheme(t.dataset.v); break;
+    case 'wipe': if(confirm('¿Borrar TODOS los datos? Esto no se puede deshacer.') && confirm('Seguro. ¿Borrar todo?')){ S=fresh(); save(); render(); toast('Datos borrados'); } break;
+  }
+});
+$('#fab').addEventListener('click', ()=>{
+  if(tab==='movimientos') formMove('compra'); else formProd();
+});
+document.addEventListener('change', e=>{
+  if(e.target.id==='impFile'){
+    const f = e.target.files[0]; if(!f) return;
+    f.text().then(txt=>{ const r=JSON.parse(txt); if(r.v!==1||!Array.isArray(r.products)||!Array.isArray(r.moves)) throw 0;
+      if(confirm('Esto reemplaza los datos actuales por los de la copia. ¿Continuar?')){ S=r; S.set=Object.assign(fresh().set,S.set); save(); render(); toast('Copia importada'); }
+    }).catch(()=>toast('Archivo no válido'));
+  }
+  if(['cvA','cvF','cvT'].includes(e.target.id)) conv();
+});
+document.addEventListener('input', e=>{ if(e.target.id==='cvA') conv(); });
+function conv(){
+  const a=+$('#cvA').value, f=$('#cvF').value, t=$('#cvT').value, r=S.rates;
+  const rf = f==='CUP'?1:r[f], rt = t==='CUP'?1:r[t];
+  $('#cvR').textContent = (rf&&rt&&a) ? `${money(a,f)} = ${money(a*rf/rt,t,true)}` : 'Faltan tasas para esta conversión';
+}
+document.addEventListener('submit', e=>{
+  e.preventDefault(); const f=e.target, kind=f.dataset.form, d=new FormData(f), id=f.dataset.id;
+  if(kind==='rates'){
+    const r={USD:+d.get('USD'),EUR:+d.get('EUR'),MLC:+d.get('MLC')};
+    if(!(r.USD>0)){ toast('Escribe al menos la tasa del USD'); return; }
+    setRates(r,'manual'); toast('Tasas guardadas'); render();
+  }
+  else if(kind==='settings'){ S.set.token=(d.get('token')||'').trim(); S.set.auto=!!d.get('auto'); save(); toast('Guardado'); }
+  else if(kind==='prod'){
+    const name=(d.get('name')||'').trim(); if(!name) return;
+    let p = id && S.products.find(x=>x.id===id);
+    if(p){ Object.assign(p,{name,cat:d.get('cat'),unit:d.get('unit')||'u',notes:d.get('notes')}); save(); closeSheet(); render(); showProd(p.id); }
+    else{
+      p={id:uid(),name,cat:d.get('cat'),unit:d.get('unit')||'u',notes:d.get('notes'),price:null,hist:[]};
+      const pr=+d.get('price'); if(pr>0){ p.price={amt:pr,cur:d.get('pcur'),t:Date.now()}; p.hist.push({t:Date.now(),amt:pr,cur:d.get('pcur')}); }
+      S.products.push(p); save(); closeSheet(); render(); showProd(p.id); toast('Ahora registra la primera compra');
+    }
+  }
+  else if(kind==='price'){
+    const p=S.products.find(x=>x.id===id), amt=+d.get('amt'); if(!(amt>=0)) return;
+    p.price={amt,cur:d.get('cur'),t:Date.now()}; (p.hist=p.hist||[]).push({t:Date.now(),amt,cur:d.get('cur')});
+    save(); closeSheet(); render(); showProd(id); toast('Precio actualizado');
+  }
+  else if(kind==='move'){
+    const type=f.dataset.type, trade=type==='compra'||type==='venta', cur=d.get('cur');
+    const r=Object.assign({},S.rates); if(cur!=='CUP'){ const x=+d.get('rate'); if(!(x>0)){ toast('Pon la tasa'); return; } r[cur]=x; }
+    let qty=null,unit=null,amt;
+    if(trade){ qty=+d.get('qty'); unit=+d.get('unit'); amt=qty*unit; if(!(qty>0)||!(unit>=0)){ toast('Revisa cantidad y precio'); return; } }
+    else{ amt=+d.get('amt'); if(!(amt>0)){ toast('Escribe el monto'); return; } }
+    const rec={pid:d.get('pid'),type,date:d.get('date'),method:d.get('method'),cur,qty,unit,amt,r:{USD:r.USD,EUR:r.EUR,MLC:r.MLC},note:d.get('note')||''};
+    if(id){ const m=S.moves.find(x=>x.id===id); Object.assign(m,rec); } else S.moves.push(Object.assign({id:uid(),ts:Date.now()},rec));
+    save(); closeSheet(); render(); if(tab!=='movimientos') showProd(rec.pid); toast('Guardado');
+  }
+});
+
+/* ============ Inicio ============ */
+try{ const th=localStorage.getItem('inv_theme'); if(th) applyTheme(th); }catch(e){}
+render();
+try{ navigator.storage && navigator.storage.persist && navigator.storage.persist(); }catch(e){}
+if('serviceWorker' in navigator && location.protocol.startsWith('http')){ navigator.serviceWorker.register('sw.js').catch(()=>{}); }
+if(S.set.auto && S.set.token && (!S.ratesAt || Date.now()-S.ratesAt>3*3600e3)) fetchRates(true);
+window.addEventListener('online', ()=>{ if(S.set.auto && S.set.token && (!S.ratesAt || Date.now()-S.ratesAt>3*3600e3)) fetchRates(true); });
+</script>
+</body>
+</html>
